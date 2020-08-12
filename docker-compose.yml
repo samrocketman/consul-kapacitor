@@ -46,4 +46,11 @@ services:
         consul-agent.sh --consul-host consul.service.consul --advertise "$$IP" --service '{"service": {"name": "kapacitor", "tags": [], "port": 9092}}'
         chown kapacitor. /var/lib/kapacitor
         env | awk '/KAPACITOR_|PATH/ { print "export \""$$0"\"" }' > /tmp/environ.sh
+        if ! grep -F -- '[reporting]' /etc/kapacitor/kapacitor.conf; then
+        echo '' >> /etc/kapacitor/kapacitor.conf
+        cat >> /etc/kapacitor/kapacitor.conf <<'EOF'
+        [reporting]
+          enabled = false
+        EOF
+        fi
         exec su -s /bin/sh -c "set -ex; . /tmp/environ.sh; exec /entrypoint.sh kapacitord" - kapacitor
